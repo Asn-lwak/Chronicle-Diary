@@ -18,8 +18,8 @@
                 <i class="fa-solid fa-shield-halved"></i>
             </div>
             <h2 class="text-xl font-serif font-bold text-diary-900 mb-2">Sanctuary Locked</h2>
-            <p class="text-sm text-diary-600 mb-6">Your private thoughts are protected and blurred.</p>
-            <button onclick="app.unlockPrivacyShield()" class="w-full py-3 rounded-xl bg-diary-800 hover:bg-diary-900 text-white font-medium shadow-lg transition-all">Return to Journal</button>
+            <p class="text-sm text-diary-600 mb-6">This screen hides your journal when you switch away. It is a visual privacy cover, not encryption.</p>
+            <button onclick="app.unlockPrivacyShield()" class="w-full py-3 rounded-xl bg-diary-800 hover:bg-diary-900 text-white font-medium shadow-lg transition-all">Continue</button>
         </div>
     </div>
 
@@ -139,7 +139,7 @@
             <div class="flex flex-col sm:flex-row gap-3 items-center justify-between">
                 <div class="relative w-full sm:w-96">
                     <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-diary-400"><i class="fa-solid fa-magnifying-glass"></i></span>
-                    <input type="text" id="search-input" oninput="app.renderEntries()" placeholder="Search (tag:fitness, mood:😃)..." class="w-full pl-10 pr-4 py-3 bg-white border border-diary-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-diary-500 shadow-sm transition-all">
+                    <input type="text" id="search-input" oninput="app.renderEntries()" placeholder="Search memories (tag:fitness, mood:😃, date:2026-10, has:photo)..." class="w-full pl-10 pr-4 py-3 bg-white border border-diary-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-diary-500 shadow-sm transition-all">
                 </div>
                 <div class="flex gap-2 w-full sm:w-auto items-center justify-end">
                     <button onclick="app.toggleStarredFilter()" id="starred-filter-btn" class="px-4 py-3 bg-white border border-diary-200 rounded-2xl text-xs font-semibold text-diary-800 shadow-sm flex items-center gap-2 hover:bg-diary-50 transition-all">
@@ -252,7 +252,7 @@
                     <h3 class="text-lg font-serif font-bold text-diary-900 flex items-center gap-2">
                         <span>📦</span> Data Transfer & Backups
                     </h3>
-                    <p class="text-sm text-diary-600">Export your entire diary database as a JSON file to transfer to another device or keep a safe offline backup.</p>
+                    <p class="text-sm text-diary-600">Export your diary entries and embedded media as a JSON file to transfer to another device or keep an offline backup. Importing merges entries into this browser: existing entries are kept, exact duplicates are skipped, and entries with different content or context are added separately. Device security PINs are not included in backups.</p>
                     
                     <div class="flex flex-col sm:flex-row gap-4 pt-2">
                         <button onclick="app.exportData()" class="flex-1 px-5 py-3 bg-diary-800 hover:bg-diary-900 text-white font-medium rounded-xl shadow-sm text-sm flex items-center justify-center gap-2 transition-all">
@@ -450,9 +450,9 @@
                 <button onclick="app.toggleAudioRecording()" id="audio-rec-btn" class="p-2 rounded-lg bg-white border border-diary-200 hover:bg-diary-100 flex items-center gap-1 text-rose-600 font-semibold"><i class="fa-solid fa-microphone"></i> Record</button>
                 <span class="text-[10px] text-diary-500 whitespace-nowrap"></span>
                 <button onclick="app.toggleAudioPause()" id="audio-pause-btn" class="hidden p-2 rounded-lg bg-amber-50 border border-amber-200 hover:bg-amber-100 flex items-center gap-1 text-amber-700 font-semibold"><i class="fa-solid fa-pause"></i> Pause</button>
-                <label class="p-2 rounded-lg bg-white border border-diary-200 hover:bg-diary-100 flex items-center gap-1 cursor-pointer text-diary-800 font-semibold">
-                    <i class="fa-solid fa-camera"></i> Camera <input id="camera-input" type="file" accept="image/*" capture="environment" onchange="app.attachPhoto(event)" class="hidden">
-                </label>
+                <button type="button" onclick="app.openCameraModal()" class="p-2 rounded-lg bg-white border border-diary-200 hover:bg-diary-100 flex items-center gap-1 text-diary-800 font-semibold">
+                    <i class="fa-solid fa-camera"></i> Camera
+                </button>
                 <label class="p-2 rounded-lg bg-white border border-diary-200 hover:bg-diary-100 flex items-center gap-1 cursor-pointer text-diary-800 font-semibold">
                     <i class="fa-solid fa-images"></i> Gallery <input id="photo-input" type="file" accept="image/*" multiple onchange="app.attachPhoto(event)" class="hidden">
                 </label>
@@ -465,6 +465,10 @@
                         <label class="flex items-center gap-2 bg-diary-50 border border-diary-200 px-3 py-2 rounded-xl text-xs font-semibold text-diary-800">
                             <span>Date</span>
                             <input type="date" id="entry-date-input" class="bg-transparent outline-none text-diary-800">
+                        </label>
+                        <label class="flex items-center gap-2 bg-diary-50 border border-diary-200 px-3 py-2 rounded-xl text-xs font-semibold text-diary-800">
+                            <span><i class="fa-regular fa-clock mr-1"></i>Time</span>
+                            <input type="time" id="entry-time-input" class="bg-transparent outline-none text-diary-800" step="60" aria-label="Entry time">
                         </label>
                         <div class="flex items-center gap-2 bg-diary-50 border border-diary-200 px-3 py-2 rounded-xl text-xs font-semibold text-diary-800 min-w-0">
                             <i class="fa-solid fa-location-dot text-diary-600"></i>
@@ -517,6 +521,27 @@
                     <div id="audio-status" class="hidden text-rose-500 font-bold animate-pulse">● Recording voice note... <span id="audio-timer">00:00</span></div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- IN-APP CAMERA MODAL -->
+    <div id="camera-modal" class="fixed inset-0 z-50 bg-diary-900/80 backdrop-blur-sm hidden items-center justify-center p-3 sm:p-6" style="display:none" role="dialog" aria-modal="true" aria-labelledby="camera-modal-title">
+        <div class="camera-dialog bg-white w-full max-w-xl rounded-3xl shadow-2xl p-4 sm:p-6 flex flex-col gap-4">
+            <div class="flex items-center justify-between gap-3">
+                <h3 id="camera-modal-title" class="font-serif font-bold text-lg text-diary-900"><i class="fa-solid fa-camera mr-2"></i>Take a photo</h3>
+                <button type="button" onclick="app.closeCameraModal()" class="p-2 rounded-xl bg-diary-100 hover:bg-diary-200" aria-label="Close camera"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="camera-preview-wrap rounded-2xl overflow-hidden bg-black">
+                <video id="camera-video" autoplay playsinline muted aria-label="Live camera preview"></video>
+                <canvas id="camera-canvas" class="hidden"></canvas>
+            </div>
+            <p id="camera-message" class="text-sm text-diary-600" role="status">Allow camera access when your browser asks.</p>
+            <div class="flex flex-wrap items-center justify-center gap-2">
+                <button id="camera-switch-btn" type="button" onclick="app.switchCamera()" class="px-4 py-2.5 rounded-xl bg-diary-100 hover:bg-diary-200 text-sm font-semibold text-diary-800"><i class="fa-solid fa-camera-rotate mr-2"></i>Switch camera</button>
+                <button id="camera-capture-btn" type="button" onclick="app.captureCameraPhoto()" disabled class="px-5 py-2.5 rounded-xl bg-diary-800 text-white text-sm font-semibold disabled:opacity-40"><i class="fa-solid fa-circle-dot mr-2"></i>Capture photo</button>
+                <button type="button" onclick="app.closeCameraModal()" class="px-4 py-2.5 rounded-xl border border-diary-200 hover:bg-diary-50 text-sm font-semibold text-diary-700">Close</button>
+            </div>
+            <p class="text-[11px] text-diary-500 text-center">Photos are attached to this entry and stored in this browser. Chronicle does not upload them to a server.</p>
         </div>
     </div>
 
